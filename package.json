@@ -4,14 +4,15 @@
   "description": "Reporting script for 1:1 Career Growth Trello board",
   "main": "src/script.js",
   "dependencies": {
-    "babel-plugin-static-fs": "^3.0.0",
     "fs": "0.0.1-security",
     "moment": "^2.25.3",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-latest": "^6.24.1"
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
+    "babel-plugin-static-fs": "^3.0.0"
   },
   "scripts": {
     "start": "npm run build && npm run report",
