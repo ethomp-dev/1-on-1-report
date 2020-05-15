@@ -22,7 +22,6 @@ var recentComments = cardActions.filter((action) =>
 
 var parsedRecentComments = recentComments.map((comment) => {
     const { text, card } = comment.data;
-    console.log(text);
 
     if (!card) return;
 
