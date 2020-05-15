@@ -6,7 +6,7 @@
   "dependencies": {
     "babel-plugin-static-fs": "^3.0.0",
     "fs": "0.0.1-security",
-    "moment": "^2.25.1"
+    "moment": "^2.25.3"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
