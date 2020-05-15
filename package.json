@@ -1,0 +1,23 @@
+{
+  "name": "1-on-1-report",
+  "version": "0.0.1",
+  "description": "Reporting script for 1:1 Career Growth Trello board",
+  "main": "src/script.js",
+  "dependencies": {
+    "babel-plugin-static-fs": "^3.0.0",
+    "fs": "0.0.1-security",
+    "moment": "^2.25.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-latest": "^6.24.1"
+  },
+  "scripts": {
+    "start": "npm run build && npm run report",
+    "build": "babel src -d dist",
+    "report": "node dist/script.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "elizabethompson",
+  "license": "ISC"
+}
