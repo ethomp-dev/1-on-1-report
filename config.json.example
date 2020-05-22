@@ -1,52 +1,52 @@
 {
-    "boardId": "",
-    "auth": {
-      "key": "",
-      "token": ""
+  "boardId": "",
+  "auth": {
+    "key": "",
+    "token": ""
+  },
+  "dateFormat": "MM.DD.YYYY",
+  "sections": [
+    {
+      "id": "PANDEMIC",
+      "order": 0,
+      "cardId": "",
+      "hasNumericalPrefix": false
     },
-    "dateFormat": "MM.DD.YYYY",
-    "sections": [
-      {
-        "id": "PANDEMIC",
-        "order": 0,
-        "cardId": "",
-        "hasNumericalPrefix": false
-      },
-      {
-        "id": "HELPFUL",
-        "order": 1,
-        "cardId": "",
-        "hasNumericalPrefix": true
-      },
-      {
-        "id": "CHALLENGING",
-        "order": 2,
-        "cardId": "",
-        "hasNumericalPrefix": true
-      },
-      {
-        "id": "GOALS",
-        "order": 3,
-        "cardId": "",
-        "hasNumericalPrefix": true
-      },
-      {
-        "id": "ACTIONS",
-        "order": 4,
-        "cardId": "",
-        "hasNumericalPrefix": true
-      },
-      {
-        "id": "MANAGER_ACTIONS",
-        "order": 5,
-        "cardId": "",
-        "hasNumericalPrefix": true
-      },
-      {
-        "id": "CORE_VALUES",
-        "order": 6,
-        "cardId": "",
-        "hasNumericalPrefix": true
-      }
-    ]
+    {
+      "id": "HELPFUL",
+      "order": 1,
+      "cardId": "",
+      "hasNumericalPrefix": true
+    },
+    {
+      "id": "CHALLENGING",
+      "order": 2,
+      "cardId": "",
+      "hasNumericalPrefix": true
+    },
+    {
+      "id": "GOALS",
+      "order": 3,
+      "cardId": "",
+      "hasNumericalPrefix": true
+    },
+    {
+      "id": "ACTIONS",
+      "order": 4,
+      "cardId": "",
+      "hasNumericalPrefix": true
+    },
+    {
+      "id": "MANAGER_ACTIONS",
+      "order": 5,
+      "cardId": "",
+      "hasNumericalPrefix": true
+    },
+    {
+      "id": "CORE_VALUES",
+      "order": 6,
+      "cardId": "",
+      "hasNumericalPrefix": true
+    }
+  ]
 }
