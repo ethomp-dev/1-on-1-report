@@ -1,71 +1,103 @@
-'use strict';
+'use strict'
 
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
-var moment = require('moment');
+import { readFileSync, writeFileSync } from 'fs'
+import { join } from 'path'
+const fetch = require('node-fetch')
+const qs = require('query-string')
+const moment = require('moment')
 
-var jsonConfig = readFileSync(join(__dirname, '../config.json'), 'utf8');
-var config = JSON.parse(jsonConfig);
+const reportGenerator = {
+  init: async function () {
+    const config = this.fetchConfig()
+    const { boardId, auth, dateFormat, sections } = config
 
-var jsonData = readFileSync(join(__dirname, 'data.json'), 'utf8');
-var data = JSON.parse(jsonData);
+    try {
+      this.validateConfig(config)
 
-var { dateFormat, sections } = config;
-var reportDate = process.argv[2] || moment().format(dateFormat);
+      const reportDate = process.argv[2] || moment().format(dateFormat)
+      const data = await this.fetchData(boardId, auth)
 
-var cardActions = data.actions;
+      let recentComments = this.getRecentComments(data, reportDate)
+      recentComments = this.parseComments(recentComments, sections)
+      recentComments = this.sortComments(recentComments)
 
-// TODO: make this logic configurable to support different comment formats
-var recentComments = cardActions.filter((action) =>
-    action.data.text && action.data.text.includes(reportDate)
-);
+      const report = this.formatReport(reportDate, recentComments)
+      writeFileSync(join(__dirname, `../reports/${reportDate}.txt`), report)
 
-var parsedRecentComments = recentComments.map((comment) => {
-    const { text, card } = comment.data;
-
-    if (!card) return;
-
-    var commentOrder = -1;
-    var commentTitle = '';
-    // TODO: make this logic configurable to support different comment formats
-    var commentDescription = text && (
-        text.indexOf('\n\n') >= 0 ?
-            text.substring(text.indexOf('\n\n') + 2, text.length)
-            : 'Not yet started'
-        );
-
-    var sectionMap = {
-        PANDEMIC: sections.find((section) => section.id === 'PANDEMIC')
-    };
-
-    switch (card.id) {
-        case sectionMap.PANDEMIC.cardId:
-            // the "PANDEMIC" card doesn't have any prefix in the title, so use it as is
-            commentTitle = card.name;
-            break;
-        default:
-            commentOrder = sections.find((section) => section.cardId === card.id).order;
-            // all other cards have a number prefix in the title (ex. "1. Title"), so remove it here
-            commentTitle = card.name && card.name.substring(3, card.name.length);
+      console.log(`Successfully generated report for ${reportDate}`)
+    } catch (error) {
+      console.error(error.message)
+    }
+  },
+  validateConfig: ({ boardId, auth }) => {
+    if (!boardId) throw new Error('Missing Configuration: Trello Board ID')
+    if (!auth.key) throw new Error('Missing Configuration: Trello API Key')
+    if (!auth.token) throw new Error('Missing Configuration: Trello API Token')
+  },
+  fetchConfig: () => {
+    const json = readFileSync(join(__dirname, '../config.json'), 'utf8')
+    return JSON.parse(json)
+  },
+  fetchData: async (boardId, auth = {}) => {
+    const options = { encode: false }
+    const params = {
+      key: auth.key,
+      token: auth.token,
+      fields: '&actions=commentCard'
     }
 
-    return {
+    return fetch(`https://trello.com/b/${boardId}.json?${qs.stringify(params, options)}`).then(res => res.json())
+  },
+  getRecentComments: (data, reportDate) => {
+    if (!data.actions) throw new Error('API Error: Could not retrieve data')
+
+    // TODO: make this logic configurable to support different comment formats
+    return data.actions.filter((action) => action.data.text && action.data.text.includes(reportDate))
+  },
+  parseComments: (comments, sections) => {
+    return comments.map((comment) => {
+      const { text, card } = comment.data
+
+      if (!card) return
+
+      let commentOrder = -1
+      let commentTitle = ''
+      // TODO: make this logic configurable to support different comment formats
+      const commentDescription = text && (
+        text.indexOf('\n\n') >= 0 ?
+          text.substring(text.indexOf('\n\n') + 2, text.length)
+          : 'Not yet started'
+        )
+
+      const matchingCard = sectionMap.find((section) => section.cardId === card.id)
+
+      // if necessary, remove numerical prefix from title
+      commentTitle = !matchingCard.hasNumericalPrefix ? card.name : card.name && card.name.substring(3, card.name.length)
+      commentOrder = sections.find((section) => section.cardId === card.id).order
+
+      return {
         order: commentOrder,
         text: `${commentTitle}\n${commentDescription}`,
-    };
-});
+      }
+    })
+  },
+  sortComments: (comments) => {
+    return comments.sort((a, b) => {
+      const orderA = a.order
+      const orderB = b.order
+      return orderA - orderB
+    })
+  },
+  formatReport: (reportDate, comments) => {
+    const reportTitle = `1:1 Report for ${reportDate}`
+    let reportBody = ''
 
-var parsedRecentComments = parsedRecentComments.sort((a, b) => {
-    var orderA = a.order;
-    var orderB = b.order;
-    return orderA - orderB;
-})
+    comments.forEach((comment) => {
+      reportBody += `${comment.text}\n\n`
+    })
 
-var reportTitle = `1:1 Report for ${reportDate}`;
-var reportBody = '';
+    return `${reportTitle}\n\n${reportBody}`
+  }
+}
 
-parsedRecentComments.forEach((comment) => {
-    reportBody += `${comment.text}\n\n`;
-});
-
-writeFileSync(join(__dirname, `../reports/${reportDate}.txt`), `${reportTitle}\n\n${reportBody}`);
+reportGenerator.init()
