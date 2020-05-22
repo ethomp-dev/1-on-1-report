@@ -61,12 +61,11 @@ const reportGenerator = {
   parseComments: function (comments, sections) {
     return comments.map((comment) => {
       const { text, card } = comment.data
-
       if (!card) return
 
       const matchingCard = sections.find((section) => section.cardId === card.id)
+      if (!matchingCard) return
 
-      // if necessary, remove numerical prefix from title
       const commentTitle = matchingCard.hasNumericalPrefix
         ? card.name && card.name.substring(3, card.name.length)
         : card.name
@@ -80,9 +79,19 @@ const reportGenerator = {
           ? text.substring(text.indexOf('\n\n') + 2, text.length)
           : 'Not yet started')
 
+      const parsedCommentDescription = commentDescription
+        .split('- ')
+        .filter((listItem) => listItem)
+        // TODO: adjust this logic to support list items with text and link
+        .map(
+          (listItem) =>
+            `- ${listItem.indexOf('http') >= 0 ? this.parseCardLink(listItem) : listItem}`
+        )
+        .join('')
+
       return {
         order: commentOrder,
-        text: `${commentTitle}\n${commentDescription}`,
+        text: `${commentTitle}\n${parsedCommentDescription}`,
       }
     })
   },
@@ -93,12 +102,21 @@ const reportGenerator = {
       return orderA - orderB
     })
   },
+  parseCardLink: function (link) {
+    const linkTextArr = link.substring(link.lastIndexOf('/') + 1, link.length).split('-')
+    linkTextArr.shift()
+
+    let linkText = linkTextArr.join(' ')
+    linkText = linkText.charAt(0).toUpperCase() + linkText.slice(1)
+
+    return linkText
+  },
   formatReport: function (reportDate, comments) {
     const reportTitle = `1:1 Report for ${reportDate}`
     let reportBody = ''
 
     comments.forEach((comment) => {
-      reportBody += `${comment.text}\n\n`
+      reportBody += comment ? `${comment.text}\n\n` : ''
     })
 
     return `${reportTitle}\n\n${reportBody}`
