@@ -29,16 +29,16 @@ const reportGenerator = {
       console.error(error.message)
     }
   },
-  validateConfig: ({ boardId, auth }) => {
+  validateConfig: function ({ boardId, auth }) {
     if (!boardId) throw new Error('Missing Configuration: Trello Board ID')
     if (!auth.key) throw new Error('Missing Configuration: Trello API Key')
     if (!auth.token) throw new Error('Missing Configuration: Trello API Token')
   },
-  fetchConfig: () => {
+  fetchConfig: function () {
     const json = readFileSync(join(__dirname, '../config.json'), 'utf8')
     return JSON.parse(json)
   },
-  fetchData: async (boardId, auth = {}) => {
+  fetchData: async function (boardId, auth = {}) {
     const options = { encode: false }
     const params = {
       key: auth.key,
@@ -50,7 +50,7 @@ const reportGenerator = {
       `https://trello.com/b/${boardId}.json?${qs.stringify(params, options)}`
     ).then((res) => res.json())
   },
-  getRecentComments: (data, reportDate) => {
+  getRecentComments: function (data, reportDate) {
     if (!data.actions) throw new Error('API Error: Could not retrieve data')
 
     // TODO: make this logic configurable to support different comment formats
@@ -58,7 +58,7 @@ const reportGenerator = {
       (action) => action.data.text && action.data.text.includes(reportDate)
     )
   },
-  parseComments: (comments, sections) => {
+  parseComments: function (comments, sections) {
     return comments.map((comment) => {
       const { text, card } = comment.data
 
@@ -86,14 +86,14 @@ const reportGenerator = {
       }
     })
   },
-  sortComments: (comments) => {
+  sortComments: function (comments) {
     return comments.sort((a, b) => {
       const orderA = a.order
       const orderB = b.order
       return orderA - orderB
     })
   },
-  formatReport: (reportDate, comments) => {
+  formatReport: function (reportDate, comments) {
     const reportTitle = `1:1 Report for ${reportDate}`
     let reportBody = ''
 
