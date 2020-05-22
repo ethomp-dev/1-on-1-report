@@ -43,16 +43,20 @@ const reportGenerator = {
     const params = {
       key: auth.key,
       token: auth.token,
-      fields: '&actions=commentCard'
+      fields: '&actions=commentCard',
     }
 
-    return fetch(`https://trello.com/b/${boardId}.json?${qs.stringify(params, options)}`).then(res => res.json())
+    return fetch(
+      `https://trello.com/b/${boardId}.json?${qs.stringify(params, options)}`
+    ).then((res) => res.json())
   },
   getRecentComments: (data, reportDate) => {
     if (!data.actions) throw new Error('API Error: Could not retrieve data')
 
     // TODO: make this logic configurable to support different comment formats
-    return data.actions.filter((action) => action.data.text && action.data.text.includes(reportDate))
+    return data.actions.filter(
+      (action) => action.data.text && action.data.text.includes(reportDate)
+    )
   },
   parseComments: (comments, sections) => {
     return comments.map((comment) => {
@@ -60,20 +64,21 @@ const reportGenerator = {
 
       if (!card) return
 
-      let commentOrder = -1
-      let commentTitle = ''
-      // TODO: make this logic configurable to support different comment formats
-      const commentDescription = text && (
-        text.indexOf('\n\n') >= 0 ?
-          text.substring(text.indexOf('\n\n') + 2, text.length)
-          : 'Not yet started'
-        )
-
-      const matchingCard = sectionMap.find((section) => section.cardId === card.id)
+      const matchingCard = sections.find((section) => section.cardId === card.id)
 
       // if necessary, remove numerical prefix from title
-      commentTitle = !matchingCard.hasNumericalPrefix ? card.name : card.name && card.name.substring(3, card.name.length)
-      commentOrder = sections.find((section) => section.cardId === card.id).order
+      const commentTitle = matchingCard.hasNumericalPrefix
+        ? card.name && card.name.substring(3, card.name.length)
+        : card.name
+
+      const commentOrder = sections.find((section) => section.cardId === card.id).order
+
+      // TODO: make this logic configurable to support different comment formats
+      const commentDescription =
+        text &&
+        (text.indexOf('\n\n') >= 0
+          ? text.substring(text.indexOf('\n\n') + 2, text.length)
+          : 'Not yet started')
 
       return {
         order: commentOrder,
@@ -97,7 +102,7 @@ const reportGenerator = {
     })
 
     return `${reportTitle}\n\n${reportBody}`
-  }
+  },
 }
 
 reportGenerator.init()
